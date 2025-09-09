@@ -9,7 +9,7 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Repository
-public class UserDaoImp implements UserDao {
+public class UserDaoImp extends UserDao {
 
    @Autowired
    private SessionFactory sessionFactory;
