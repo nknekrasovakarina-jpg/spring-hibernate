@@ -10,24 +10,21 @@ public class User {
    @GeneratedValue(strategy = GenerationType.IDENTITY)
    private Long id;
 
+   @Column(name = "first_name")
    private String firstName;
+
+   @Column(name = "last_name")
    private String lastName;
+
+   @Column(name = "email")
    private String email;
 
    @OneToOne(cascade = CascadeType.ALL)
-   @JoinColumn(name = "car_id")
+   @JoinColumn(name = "car_id", referencedColumnName = "id")
    private Car car;
 
    public User() {}
 
-   // Конструктор без машины
-   public User(String firstName, String lastName, String email) {
-      this.firstName = firstName;
-      this.lastName = lastName;
-      this.email = email;
-   }
-
-   // Конструктор с машиной
    public User(String firstName, String lastName, String email, Car car) {
       this.firstName = firstName;
       this.lastName = lastName;
@@ -36,7 +33,6 @@ public class User {
    }
 
    public Long getId() { return id; }
-   public void setId(Long id) { this.id = id; }
    public String getFirstName() { return firstName; }
    public void setFirstName(String firstName) { this.firstName = firstName; }
    public String getLastName() { return lastName; }
@@ -47,15 +43,13 @@ public class User {
    public void setCar(Car car) { this.car = car; }
 
    @Override
-   public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof User)) return false;
-      User user = (User) o;
-      return email.equals(user.email);
-   }
-
-   @Override
-   public int hashCode() {
-      return email.hashCode();
+   public String toString() {
+      return "User{" +
+              "id=" + id +
+              ", firstName='" + firstName + '\'' +
+              ", lastName='" + lastName + '\'' +
+              ", email='" + email + '\'' +
+              ", car=" + car.getModel() + " " + car.getSeries() +
+              '}';
    }
 }

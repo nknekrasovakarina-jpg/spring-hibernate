@@ -1,29 +1,33 @@
 package hiber.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import java.util.Properties;
+import javax.sql.DataSource;
+
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.*;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.hibernate5.*;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.sql.DataSource;
-import java.util.Properties;
-
 @Configuration
-@EnableTransactionManagement
 @ComponentScan(basePackages = "hiber")
+@EnableTransactionManagement
+@PropertySource("classpath:db.properties")
 public class AppConfig {
+
+   @Autowired
+   private Environment env;
 
    @Bean
    public DataSource dataSource() {
-      DriverManagerDataSource ds = new DriverManagerDataSource();
-      ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
-      ds.setUrl("jdbc:mysql://localhost:3306/spring_hibernate_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
-      ds.setUsername("root");
-      ds.setPassword("password");
-      return ds;
+      DriverManagerDataSource dataSource = new DriverManagerDataSource();
+      dataSource.setDriverClassName(env.getProperty("db.driver"));
+      dataSource.setUrl(env.getProperty("db.url"));
+      dataSource.setUsername(env.getProperty("db.username"));
+      dataSource.setPassword(env.getProperty("db.password"));
+      return dataSource;
    }
 
    @Bean
@@ -33,18 +37,19 @@ public class AppConfig {
       sessionFactory.setPackagesToScan("hiber.model");
 
       Properties hibernateProperties = new Properties();
-      hibernateProperties.put("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
-      hibernateProperties.put("hibernate.show_sql", "true");
-      hibernateProperties.put("hibernate.hbm2ddl.auto", "update");
+      hibernateProperties.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
+      hibernateProperties.put("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
+      hibernateProperties.put("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
 
       sessionFactory.setHibernateProperties(hibernateProperties);
       return sessionFactory;
    }
 
    @Bean
-   public HibernateTransactionManager transactionManager() {
+   @Autowired
+   public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
       HibernateTransactionManager txManager = new HibernateTransactionManager();
-      txManager.setSessionFactory(sessionFactory().getObject());
+      txManager.setSessionFactory(sessionFactory);
       return txManager;
    }
 }
